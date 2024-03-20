@@ -17,8 +17,10 @@ public class MainActivity extends FlutterActivity {
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
         super.configureFlutterEngine(flutterEngine);
-        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
-                .setMethodCallHandler((call, result) -> {
+
+        MethodChannel channel = new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL);
+
+        channel.setMethodCallHandler((call, result) -> {
             switch (call.method) {
                 case "create":
                     ImageView imageView = new ImageView(getApplicationContext());
@@ -31,6 +33,10 @@ public class MainActivity extends FlutterActivity {
                             .setY(Screen.height, 0.3f)
                             .setDesktopShow(true)
                             .build();
+
+                    imageView.setOnClickListener(c -> {
+                        channel.invokeMethod("touch", null);
+                    });
                     break;
                 case "show":
                     FloatWindow.get().show();
@@ -38,7 +44,18 @@ public class MainActivity extends FlutterActivity {
                 case "hide":
                     FloatWindow.get().hide();
                     break;
+                case "isShowing":
+                    result.success(FloatWindow.get().isShowing());
+                    break;
+                default:
+                    result.notImplemented();
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        FloatWindow.destroy();
+        super.onDestroy();
     }
 }

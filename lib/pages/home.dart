@@ -14,6 +14,19 @@ class _HomePageState extends State<HomePage> {
   int count = 0;
 
   @override
+  void initState() {
+    super.initState();
+    platform.setMethodCallHandler((call) {
+      if (call.method == 'touch') {
+        setState(() {
+          count += 1;
+        });
+      }
+      return Future(() => null);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -49,6 +62,12 @@ class _HomePageState extends State<HomePage> {
                 platform.invokeListMethod('hide');
               },
               child: const Text('Hide'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                platform.invokeMethod('isShowing').then((isShowing) => print(isShowing));
+              },
+              child: const Text('Verify'),
             ),
           ],
         ),
